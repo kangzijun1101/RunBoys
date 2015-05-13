@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>ball game!</title>
+		<style>
+			form{
+				width:330px;
+				margin: 20px;
+				background-color: #c3c3c3;
+				padding: 20px;
+			}
+		</style>
+	</head>
+	<body onLoad="init();">
+		<script type="text/javascript">
+			//碰撞盒子位置和宽高
+			var bx = 20;
+			var by = 20;
+			var bwidth = 350;
+			var bheight = 250;
+			//ball的半径
+			var bradius = 10;
+			//碰撞检测区域
+			var bleft = bx + 2* bradius;
+			var bright = bx + bwidth - 2*bradius;
+			var bbottom = by + bheight - 2*bradius;
+			var btop = by + 2*bradius;
+			//移动速度
+			var bxv = 4;
+			var byv = 6;
+			//ball的起始位置
+			var ballx = 50;
+			var bally = 60;
+
+			//颜色梯度数组
+			var colorarray = [
+						[255, 0, 0],
+						[255,255,0],
+						[0 ,255, 0],
+						[0,255,255],
+						[0 , 0,255],
+						[255,0,255] ];
+			//球形图片
+			var ballimg = new Image();
+			ballimg.src = "../assets/ball.png";
+
+			var ctx; //画笔
+			function init()
+			{
+				ctx = document.getElementById( "k_cvs" ).getContext( "2d" );
+				ctx.linewidth = bradius; //盒子边框与ball半径一样大小
+				var grad = ctx.createLinearGradient( bx, by, bx + bwidth, by + bheight );
+				var color;
+				for( var idx = 0; idx < colorarray.length; idx ++ )
+				{
+					color = 'rgb(' + colorarray[idx][0] + ',' + colorarray[idx][1] + ',' + colorarray[idx][2] + ')';
+					grad.addColorStop( idx / colorarray.length, color );
+				}
+				ctx.fillStyle = grad;
+				ballMove();
+				setInterval( ballMove, 100 );
+			}
+
+			/**
+			 * ball的移动
+			 * @author 康自军
+			 * @time 2015-05-13
+			 */
+			function ballMove()
+			{
+				ctx.clearRect( bx, by, bwidth, bheight ); //清除canvas
+				checkMove();
+				ctx.drawImage( ballimg, ballx - bradius, bally - bradius, 2 * bradius, 2 * bradius ); //画球图片
+				//使用渐变画盒子
+				ctx.fillRect( bx, by, bwidth, bradius ); //上方
+				ctx.fillRect( bx, by + bheight - bradius, bwidth, bradius ); //下方
+				ctx.fillRect( bx, by, bradius, bheight );//左边
+				ctx.fillRect( bx + bwidth - bradius, by, bradius, bheight );//右边
+			}
+
+			//碰撞检查和移动
+			function checkMove()
+			{
+				//预测当前的位置
+				var curx = ballx + bxv;
+				var cury = bally + byv;
+
+				if( curx <= bleft )
+				{
+					bxv = -bxv;
+					curx = bleft;
+				}
+				else if( curx >= bright )
+				{
+					bxv = -bxv;
+					curx = bright;
+				}
+
+				if( cury <= btop )
+				{
+					byv = -byv;
+					cury = btop;
+				}
+				else if( cury >= bbottom )
+				{
+					byv = - byv;
+					cury = bbottom;
+				}
+
+				ballx = curx;
+				bally = cury;
+			}
+
+			function apply()
+			{
+				bxv = Number( k_form.hv.value );
+				byx = Number( k_form.vv.value );
+				return false;
+			}
+		</script>
+		<canvas id="k_cvs" width="400" height="300"> 
+			Your browser does not support the HTML5 elemnet!
+		</canvas>
+		<form id="k_form" onSubmit="return apply();">
+			Horizontal velocity <input name="hv" value="3" type="number" min="-10" max="10"/>
+			<br>
+			Vectical velocity <input name="vv" value="4" type="number" min="-10" max="10"/>
+			<input type="submit" value="Apply" />
+		</form>
+	</body>
+</html>
